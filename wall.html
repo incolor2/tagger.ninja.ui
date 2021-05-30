@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Display images</title>
+    <style>
+        html {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        canvas {
+            border: 0px solid rgb(255, 0, 0);
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="position: relative;">
+        <canvas id="icanvas" style="z-index: 0;position: absolute; left: 0; top: 0;"></canvas>
+        <canvas id="tcanvas" style="z-index: 1;position: absolute; left: 0; top: 0;"></canvas>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+    <script>
+
+        // Get canvas
+        const canvas = document.getElementById('icanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasText = document.getElementById('tcanvas');
+        const ctxText = canvasText.getContext('2d');
+
+        // Set canvas size
+        canvas.width = document.body.clientWidth;
+        canvas.height = document.body.clientHeight;
+
+        // Set canvas size
+        canvasText.width = document.body.clientWidth;
+        canvasText.height = document.body.clientHeight;
+
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        // Image params
+        const cardName = 'image';
+        const cardPadding = 0;
+
+        let position = {};
+        let positionText = {};
+        let imagesCanvas = {};
+        let image;
+        let imageIndex = 0;
+
+        var anim = { alpha: 1, blur: 10 };
+
+        loadNextImage();
+
+        function loadNextImage() {
+
+            position = {};
+            positionText = {};
+            imagesCanvas = {};
+            anim = { alpha: 1, blur: 10 };
+
+            image = getImage();
+            image.onload = init;
+        }
+
+        function init() {
+
+            // set start pos
+            position = {
+                // x: cardPadding,
+                origX: canvas.width,
+                y: cardPadding,
+                origY: cardPadding,
+                xMax: canvas.width - cardPadding - image.width,
+                yMax: canvas.height - cardPadding - image.height,
+                x: canvas.width
+            };
+
+            // set start pos
+            positionText = {
+                // x: cardPadding,
+                origX: canvas.width,
+                y: cardPadding,
+                origY: cardPadding,
+                xMax: canvas.width - cardPadding - image.width,
+                yMax: canvas.height - cardPadding - image.height,
+                x: canvas.width
+            };
+
+            draw();
+            drawText();
+            bounceIn();
+        }
+
+        function getImage() {
+            var image = new Image();
+
+            let imageArray = [
+                {
+                    image: "https://serve-static-images.s3-eu-west-1.amazonaws.com/20200719_184133.jpg",
+                    text: "I'm trying to replicate the attached."
+                },
+                {
+                    image: "https://serve-static-images.s3-eu-west-1.amazonaws.com/20200719_191526.jpg",
+                    text: "Also, I have the GSAP Business plan, so I have access to all plugins."
+                },
+                {                    
+                    image: "https://serve-static-images.s3-eu-west-1.amazonaws.com/20200719_191606.jpg",
+                    text: "Thanks in advance for any help with this!"
+                },
+                {
+                    image: "https://serve-static-images.s3-eu-west-1.amazonaws.com/20200719_191606.jpg",
+                    text: "I'm developing HTML canvas banners in Adobe Animate and using GSAP."
+                }
+            ]
+
+            if (imageIndex === imageArray.length) {
+                imageIndex = 0;
+            }
+
+            image.src = imageArray[imageIndex].image;
+            image.alt = imageArray[imageIndex].text;
+
+            imageIndex++;
+            return image;
+        }
+
+        function addImage(params) {
+            let name = params.name;
+
+            if (imagesCanvas[name] === undefined) {
+                imagesCanvas[name] = document.createElement('canvas');
+            }
+            imagesCanvas[name].width = image.width;
+            imagesCanvas[name].height = image.height;
+
+            var hRatio = canvas.width / image.width;
+            var vRatio = canvas.height / image.height;
+            var ratio = Math.min(hRatio, vRatio);
+
+            position.centerShift_x = (canvas.width - image.width * ratio) / 2;
+            let imageCtx = imagesCanvas[name].getContext('2d');
+            imageCtx.clearRect(0, 0, image.width, image.height);
+            imageCtx.drawImage(image, 0, 0, image.width, image.height);
+            ctx.drawImage(imagesCanvas[name], params.x, params.y, image.width * ratio, image.height * ratio);
+
+        }
+
+        function getScaledImageSize() {
+
+            var hRatio = canvas.width / image.width;
+            var vRatio = canvas.height / image.height;
+            var ratio = Math.min(hRatio, vRatio);
+
+            return { width: image.width * ratio, height: image.height * ratio }
+        }
+
+        function addText(params) {
+
+            ctxText.font = getFont();
+            // ctxText.fillStyle = "white";
+            ctxText.fillStyle = 'rgba(255,255,255,' + anim.alpha + ')';
+            ctxText.textAlign = "left";
+            ctxText.clearRect(0, 0, canvasText.width, canvasText.height);
+
+            var hRatio = canvas.width / image.width;
+            var vRatio = canvas.height / image.height;
+            var ratio = Math.min(hRatio, vRatio);
+            let text = image.alt;
+
+            wrapText(ctxText, text, params.x, getScaledImageSize().height * 0.8, getScaledImageSize().width, 65);
+        }
+
+        function getFont() {
+            var fontBase = canvasText.width;
+            var fontSize = 60;
+            var ratio = fontSize / fontBase;
+            var cSize = canvas.width * ratio;
+            return (cSize | 0) + 'px Verdana';
+        }
+
+        function wrapText(context, text, x, y, maxWidth, lineHeight) {
+            var words = text.split(' ');
+            var line = '';
+
+            for (var n = 0; n < words.length; n++) {
+                var testLine = line + words[n] + ' ';
+                var metrics = context.measureText(testLine);
+                var testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    context.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+            }
+
+            console.log(x);
+            context.fillText(line, x + (0 * maxWidth), y);
+        }
+
+        function drawCanvas() {
+            ctx.fillStyle = 'rgb(0,0,0)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function draw() {
+            drawCanvas();
+            addImage({ name: cardName, x: position.x, y: position.y });
+        }
+
+        function drawText() {
+            addText({ name: cardName, x: positionText.x, y: positionText.y });
+        }
+
+        function bounceIn() {
+            gsap.to(position, {
+                duration: 4, ease: "bounce.out(1, 0.3)", x: position.centerShift_x,
+                onUpdate: function () {
+                    draw();
+                },
+                onComplete: function () {
+                    bounceInText();
+                    setTimeout(bounceOut, 10 * 1000);
+                    setTimeout(bounceOutText, 8 * 1000);
+                }
+            });
+        }
+
+        function bounceInText() {
+            gsap.to(positionText, {
+                duration: 4, ease: "bounce.out(1, 0.3)", x: position.centerShift_x * 1.1,
+                onUpdate: function () {
+                    drawText();
+                },
+                onComplete: function () {
+                }
+            });
+        }
+
+        function bounceOut() {
+            gsap.to(position, {
+                duration: 4, ease: "power1.out", x: -position.origX,
+                onUpdate: function () {
+                    draw();
+                },
+                onComplete: function () {
+                    console.log("Image rotation done");
+                    loadNextImage();
+                }
+            });
+        }
+
+        function bounceOutText() {
+            gsap.to(positionText, {
+                duration: 4, ease: "power1.out", x: -position.origX,
+                onUpdate: function () {
+                    drawText();
+                },
+                onComplete: function () {
+
+                },
+                onplay: function () {
+                    console.log("start play");
+                    fadeOut();
+                }
+            });
+        }
+
+        function fadeOut() {
+            var textAnim = gsap.to(anim, { alpha: 0, blur: 0, duration: 2 })
+            textAnim.restart();
+        }
+
+    </script>
+</body>
+
+</html>
