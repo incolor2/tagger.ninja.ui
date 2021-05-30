@@ -115,7 +115,7 @@
                     image: "https://serve-static-images.s3-eu-west-1.amazonaws.com/20200719_191526.jpg",
                     text: "Also, I have the GSAP Business plan, so I have access to all plugins."
                 },
-                {                    
+                {
                     image: "https://serve-static-images.s3-eu-west-1.amazonaws.com/20200719_191606.jpg",
                     text: "Thanks in advance for any help with this!"
                 },
@@ -284,6 +284,26 @@
             var textAnim = gsap.to(anim, { alpha: 0, blur: 0, duration: 2 })
             textAnim.restart();
         }
+
+
+        function getFullscreenElement() {
+            return document.fullscreenElement   //standard property
+                || document.webkitFullscreenElement //safari/opera support
+                || document.mozFullscreenElement    //firefox support
+                || document.msFullscreenElement;    //ie/edge support
+        }
+
+        function toggleFullscreen() {
+            if (getFullscreenElement()) {
+                document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen().catch(console.log);
+            }
+        }
+        document.addEventListener('dblclick', () => {
+            toggleFullscreen();
+        });
+
 
     </script>
 </body>
