@@ -293,22 +293,38 @@
                 !document.webkitFullscreenElement && !document.msFullscreenElement) {
                 if (elem.requestFullscreen) {
                     elem.requestFullscreen();
+                    // draw();
+                    // drawText();
                 } else if (elem.msRequestFullscreen) {
                     elem.msRequestFullscreen();
+                    // draw();
+                    // drawText();
                 } else if (elem.mozRequestFullScreen) {
                     elem.mozRequestFullScreen();
+                    // draw();
+                    // drawText();
                 } else if (elem.webkitRequestFullscreen) {
                     elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                    // draw();
+                    // drawText();
                 }
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
+                    // draw();
+                    // drawText();
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
+                    draw();
+                    drawText();
                 } else if (document.mozCancelFullScreen) {
                     document.mozCancelFullScreen();
+                    // draw();
+                    // drawText();
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
+                    // draw();
+                    // drawText();
                 }
             }
         }
@@ -321,6 +337,21 @@
             toggleFullscreen(this);
             console.log("here");
         });
+
+        window.addEventListener("resize", resize);
+        function resize(event) {
+            console.log("resize");
+
+            // Set canvas size
+            canvas.width = document.body.clientWidth;
+            canvas.height = document.body.clientHeight;
+
+            // Set canvas size
+            canvasText.width = document.body.clientWidth;
+            canvasText.height = document.body.clientHeight;
+            draw();
+            drawText();
+        };
 
 
     </script>
