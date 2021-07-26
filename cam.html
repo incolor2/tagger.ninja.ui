@@ -92,75 +92,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
     crossorigin="anonymous"></script>
-  <script>
-
-    var camInput = document.getElementById('cameraButton');
-    var tagId = "";
-    var tagText = "";
-
-    function uploadTag() {
-      tagText = document.getElementById('tagText').value
-      console.log(tagText);
-      sendRequest();
-    }
-
-    const sendRequest = async () => {
-
-      let body = {
-        id: tagId,
-        message: tagText,
-        date: Date.now().toString()
-      }
-
-      const response = await fetch('https://rib0pfi622.execute-api.eu-west-1.amazonaws.com/dev/tag', {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      const status = await response.ok
-      console.log(status);
-    }
-
-
-    function uploadImage() {
-      var file = camInput.files[0];
-      var xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener("progress", uploadProgress, false);
-      xhr.addEventListener("load", uploadComplete, false);
-      xhr.addEventListener("error", uploadFailed, false);
-      xhr.addEventListener("abort", uploadCanceled, false);
-      xhr.open("PUT", "https://rib0pfi622.execute-api.eu-west-1.amazonaws.com/dev/tag/image");
-      xhr.send(file);
-    }
-
-    function uploadProgress(evt) {
-      if (evt.lengthComputable) {
-        var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-        document.getElementById('progress').innerHTML = percentComplete.toString() + '%';
-      }
-      else {
-        document.getElementById('progress').innerHTML = 'Upload error!';
-      }
-    }
-    function uploadComplete(evt) {
-
-      let response = JSON.parse(evt.target.responseText);
-      tagId = response.id;
-    }
-
-    function uploadFailed(evt) {
-      console.log(evt);
-    }
-
-    function uploadCanceled(evt) {
-      console.log("Upload cancelled by the user or network error!");
-    }
-
-    camInput.addEventListener('change', uploadImage, false);
-  </script>
-
+    <script src="scripts/cam.js"></script>
 </body>
 
 </html>
